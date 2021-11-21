@@ -316,22 +316,23 @@ public class Database implements DatabaseInterface {
         }
 
         // Get db connection and run sqlQuery.
-        Connection conn = DriverManager.getConnection(connectionUrl, dbUser, dbPassword);
-        conn.setAutoCommit(true);
-        Statement stmt = conn.createStatement();
+        Connection connection = DriverManager.getConnection(connectionUrl, dbUser, dbPassword);
+        connection.setAutoCommit(true);
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                Objects.requireNonNull(sqlQuery)
+        );
         ResultSet resultSet = null;
-        Objects.requireNonNull(sqlQuery);
         switch(queryType) {
             case UPDATE_QUERY:
-                stmt.executeUpdate(sqlQuery);
+                preparedStatement.executeUpdate();
                 return null;
             case EXECUTE_QUERY:
-                resultSet = stmt.executeQuery(sqlQuery);
+                resultSet = preparedStatement.executeQuery();
                 break;
         }
         List<Map<String, Object>> results = Objects.requireNonNull(_mapResultSet(resultSet));
-        stmt.close();
-        conn.close();
+        preparedStatement.close();
+        connection.close();
         return results;
     }
 
